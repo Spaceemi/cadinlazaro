@@ -1,0 +1,29 @@
+int n, e, t, a, b;
+  int cc=0;
+vector<int> nums[105];
+
+int bfs(int s){
+  queue<int> qu;
+  map<int, int> dist;
+    qu.push(s);
+    dist[s] = 0;
+
+    while(!qu.empty()){
+      int u = qu.front();
+      qu.pop();
+      if(dist[u] >= t){
+        return cc;
+      }
+      for(auto v : nums[u]){
+        if(!dist.count(v)){
+          dist[v] = dist[u]+1;
+          if(dist[v] >= t){return cc;}
+          else{
+          qu.push(v);
+          cc++;
+          }
+        }
+      }
+    }
+  return cc;
+}
