@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct dsu
+{
+    string u, v;
+    int costo;
+
+    // creación de una arista
+    dsu(string u, string v, int costo) : u(u), v(v), costo(costo) {}
+
+    // ordenar las aristas por costo
+    bool operator<(const dsu &otra) const
+    {
+        return costo < otra.costo;
+    }
+};
+
+// el representante (raíz) de un nodo en la estruct
+string buscar(unordered_map<string, string> &padre, string x)
+{
+    if (padre[x] != x)
+        padre[x] = buscar(padre, padre[x]); // compresion de ruta
+    return padre[x];
+}
+
+void unir(unordered_map<string, string> &padre, unordered_map<string, int> &rango, string x, string y)
+{
+    string raizX = buscar(padre, x);
+    string raizY = buscar(padre, y);
+    if (raizX != raizY)
+    {
+        if (rango[raizX] > rango[raizY])
+        {
+            padre[raizY] = raizX;
+        }
+        else
+        {
+            padre[raizX] = raizY;
+            if (rango[raizX] == rango[raizY])
+            {
+                rango[raizY]++;
+            }
+        }
+    }
+}
+
+// el costo mínimo de expansión
+int func(const vector<string> &ciudades, vector<dsu> &aristas)
+{
+    sort(aristas.begin(), aristas.end()); // ordenar las aristas por costo
+    unordered_map<string, string> padre;
+    unordered_map<string, int> rango;
+
+    for (const string &ciudad : ciudades)
+    {
+        padre[ciudad] = ciudad;
+        rango[ciudad] = 0;
+    }
+
+    int costoMST = 0;
+    int aristasUsadas = 0;
+
+    for (const dsu &a : aristas)
+    {
+        if (buscar(padre, a.u) != buscar(padre, a.v))
+        { // si unir estos nodos no forma un ciclo
+            unir(padre, rango, a.u, a.v);
+            costoMST += a.costo;
+            aristasUsadas++;
+            if (aristasUsadas == ciudades.size() - 1){
+
+                break; // se han incluido suficientes aristas
+            }
+
+        }
+    }
+
+    return costoMST;
+}
+
+int main()
+{
+    int n, m;
+    cin >> n >> m;
+    vector<dsu> aristas;
+    unordered_map<string, bool> ciudadExiste;
+
+    for (int i = 0; i < m; i++)
+    {
+        string u, v;
+        int costo;
+        cin >> u >> v >> costo;
+        aristas.emplace_back(u, v, costo);
+        ciudadExiste[u] = true;
+        ciudadExiste[v] = true;
+    }
+
+    vector<string> ciudades;
+    for (auto &entrada : ciudadExiste)
+    {
+        ciudades.push_back(entrada.first);
+    }
+
+    int cm = func(ciudades, aristas);
+
+    cout << cm;
+
+    return 0;
+}
